@@ -1,0 +1,204 @@
+
+###illustration of FDD building: 
+###2D FDD from 9 subvoxels: 
+
+n=1+8+16
+prob.c=c(0.16, 0.15, 0.13, 0.06, 0.16, 0.15, 0.13, 0.06) ##FDD of each sub-voxel: counter closkwise order
+
+
+##indices for absorbing states
+index.out=10:25
+
+tran=matrix(0,n,n)
+for(i in index.out){
+tran[i,i]=1
+
+}
+
+
+### center voxel to other 8 inside voxels: counterclock wise 
+index1=c(2,9,8,7,6,5,4,3)
+tran[1, index1]=prob.c
+
+## counterclock wise 
+index2=c(12,11, 9, 8, 1,4,3,13)
+tran[2, index2]=prob.c
+
+##counterclock wise 
+index3=c(13,12,2,1,4,16,15,14)
+tran[3,index3]=prob.c
+
+##counterclock wise 
+index4=c(3,2,1,6,5,17,16,15)
+
+tran[4,index4]=prob.c
+
+##counterclock wise 
+index5=c(4,1,6,20,19,18,17,16)
+tran[5,index5]=prob.c
+
+##counterclock wise 
+index6=c(1,8,7,21,20,19,5,4)
+tran[6,index6]=prob.c
+
+##counterclock wise 
+index7=c(8,24,23,22,21,20,6,1)
+tran[7,index7]=prob.c
+
+##counterclock wise 
+index8=c(9,25,24,23,7,6,1,2)
+tran[8,index8]=prob.c
+
+##counterclock wise 
+index9=c(11,10,25,24,8,1,2,12)
+tran[9,index9]=prob.c
+ 
+
+
+###two-step transition 
+tran2=tran%*%tran
+
+
+
+
+##
+abs2=tran2[1,index.out]
+
+
+##groups of absorbing states: clockwise order 
+
+c1=c(12)-9
+c2=c(13,14,15)-9
+c3=c(16)-9
+c4=c(17,18,19)-9
+c5=c(20)-9
+c6=c(21,22,23)-9
+c7=c(24)-9
+c8=c(25,10,11)-9
+
+abs2.c=numeric(8)
+abs2.c[1]=sum(abs2[c1])
+abs2.c[2]=sum(abs2[c2])
+abs2.c[3]=sum(abs2[c3])
+abs2.c[4]=sum(abs2[c4])
+abs2.c[5]=sum(abs2[c5])
+abs2.c[6]=sum(abs2[c6])
+abs2.c[7]=sum(abs2[c7])
+abs2.c[8]=sum(abs2[c8])
+
+##
+abs2
+abs2.c
+
+sum(abs2.c)
+[1] 0.4528
+
+
+###########absorbing prob. 
+tran.abs=NULL
+tran.abs[[1]]=tran
+steps=50
+for (i in 2: steps){
+tran.abs[[i]]=tran.abs[[i-1]]%*%tran
+
+print(c(i,sum(tran.abs[[i]][1,index.out]))) ##converged in 37 steps 
+}
+
+
+##
+absp=tran.abs[[37]][1,index.out]
+ 
+absp.c=numeric(8)
+absp.c[1]=sum(absp[c1])
+absp.c[2]=sum(absp[c2])
+absp.c[3]=sum(absp[c3])
+absp.c[4]=sum(absp[c4])
+absp.c[5]=sum(absp[c5])
+absp.c[6]=sum(absp[c6])
+absp.c[7]=sum(absp[c7])
+absp.c[8]=sum(absp[c8])
+
+absp
+absp.c
+sum(absp.c)
+
+
+##########deal with different cluster size 
+########################
+#############split cluster membership
+wei=c(0.5,1,0.5)
+c1s=c(11,12,13)-9
+c2s=c(13,14,15)-9
+c3s=c(15,16,17)-9
+c4s=c(17,18,19)-9
+c5s=c(19,20,21)-9
+c6s=c(21,22,23)-9
+c7s=c(23,24,25)-9
+c8s=c(25,10,11)-9
+
+
+##two-step
+abs2.cs=numeric(8)
+abs2.cs[1]=sum(abs2[c1s]*wei)
+abs2.cs[2]=sum(abs2[c2s]*wei)
+abs2.cs[3]=sum(abs2[c3s]*wei)
+abs2.cs[4]=sum(abs2[c4s]*wei)
+abs2.cs[5]=sum(abs2[c5s]*wei)
+abs2.cs[6]=sum(abs2[c6s]*wei)
+abs2.cs[7]=sum(abs2[c7s]*wei)
+abs2.cs[8]=sum(abs2[c8s]*wei)
+
+##absorbing 
+absp.cs=numeric(8)
+absp.cs[1]=sum(absp[c1s]*wei)
+absp.cs[2]=sum(absp[c2s]*wei)
+absp.cs[3]=sum(absp[c3s]*wei)
+absp.cs[4]=sum(absp[c4s]*wei)
+absp.cs[5]=sum(absp[c5s]*wei)
+absp.cs[6]=sum(absp[c6s]*wei)
+absp.cs[7]=sum(absp[c7s]*wei)
+absp.cs[8]=sum(absp[c8s]*wei)
+
+##
+abs2.cs
+sum(abs2.cs)
+abs2.cs/sum(abs2.cs)  ##rescaled two step 
+
+absp.cs
+sum(absp.cs)
+
+
+
+
+
+########################
+### weight by cluster size
+
+abs2.c=numeric(8)
+abs2.c[1]=mean(abs2[c1])
+abs2.c[2]=mean(abs2[c2])
+abs2.c[3]=mean(abs2[c3])
+abs2.c[4]=mean(abs2[c4])
+abs2.c[5]=mean(abs2[c5])
+abs2.c[6]=mean(abs2[c6])
+abs2.c[7]=mean(abs2[c7])
+abs2.c[8]=mean(abs2[c8])
+
+abs2.c/sum(abs2.c)
+
+
+absp.c=numeric(8)
+absp.c[1]=mean(absp[c1])
+absp.c[2]=mean(absp[c2])
+absp.c[3]=mean(absp[c3])
+absp.c[4]=mean(absp[c4])
+absp.c[5]=mean(absp[c5])
+absp.c[6]=mean(absp[c6])
+absp.c[7]=mean(absp[c7])
+absp.c[8]=mean(absp[c8])
+
+absp.c/sum(absp.c)
+
+
+
+
